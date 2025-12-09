@@ -1,0 +1,9 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "dotnet watch run --urls=https://localhost:5000",
+    "build": "dotnet build",
+    "start": "dotnet run --urls=https://localhost:5000"
+  }
+}

@@ -36,3 +36,10 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+apps/api/bin/
+apps/api/obj/
+apps/api/.vs/
+apps/api/.vscode/
+apps/api/Properties/launchSettings.json
+*.user
