@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Loader2,
   Download,
@@ -22,6 +24,7 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [processedUrl, setProcessedUrl] = useState<string | null>(null);
   const [threshold, setThreshold] = useState<number[]>([120]);
+  const [invert, setInvert] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const onFileSelect = (selectedFile: File) => {
@@ -35,8 +38,7 @@ export default function Home() {
     setIsProcessing(true);
     const formData = new FormData();
     formData.append("file", file);
-    const apiUrl = `https://localhost:5000/api/document/process?threshold=${threshold[0]}`;
-
+    const apiUrl = `https://localhost:5000/api/document/process?threshold=${threshold[0]}&invert=${invert}`;
     try {
       const response = await fetch(apiUrl, { method: "POST", body: formData });
       if (!response.ok) throw new Error("Processing failed");
@@ -176,6 +178,24 @@ export default function Home() {
 
                       {/* Controls Panel */}
                       <div className="bg-zinc-50 p-6 rounded-xl border border-zinc-200/60 space-y-6">
+                        <div className="flex items-center justify-between space-x-2">
+                          <Label
+                            htmlFor="invert-mode"
+                            className="flex flex-col space-y-1"
+                          >
+                            <span className="text-sm font-semibold text-zinc-700">
+                              Dark Mode Input
+                            </span>
+                            <span className="text-xs font-normal text-zinc-500">
+                              Enable if original image has black background
+                            </span>
+                          </Label>
+                          <Switch
+                            id="invert-mode"
+                            checked={invert}
+                            onCheckedChange={setInvert}
+                          />
+                        </div>
                         <div className="space-y-3">
                           <div className="flex justify-between items-center">
                             <label
@@ -184,15 +204,43 @@ export default function Home() {
                             >
                               Threshold Sensitivity
                             </label>
-                            <span className="text-xs bg-white border px-2 py-1 rounded-md text-zinc-600 font-mono shadow-sm">
-                              {threshold[0]}
-                            </span>
+
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min={0}
+                                max={255}
+                                value={threshold[0]}
+                                onChange={(e) => {
+                                  const v = Number(e.target.value);
+                                  if (Number.isNaN(v)) return;
+                                  const clamped = Math.max(
+                                    0,
+                                    Math.min(255, Math.round(v))
+                                  );
+                                  setThreshold([clamped]);
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    if (file && !isProcessing) {
+                                      processImage();
+                                    }
+                                  }
+                                }}
+                                className="w-20 text-xs bg-white border px-2 py-1 rounded-md text-zinc-600 font-mono shadow-sm"
+                                aria-label="Threshold value"
+                              />
+                              <span className="text-xs text-zinc-500">
+                                /255
+                              </span>
+                            </div>
                           </div>
 
                           <Slider
                             id="threshold-slider"
                             value={threshold}
-                            onValueChange={setThreshold}
+                            onValueChange={(v) => setThreshold(v)}
                             max={255}
                             min={0}
                             step={1}

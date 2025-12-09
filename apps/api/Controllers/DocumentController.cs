@@ -8,7 +8,7 @@ namespace InkSaver.Api.Controllers;
 public class DocumentController : ControllerBase
 {
     [HttpPost("process")]
-    public IActionResult ProcessDocument(IFormFile file, [FromQuery] int threshold = 120) 
+    public IActionResult ProcessDocument(IFormFile file, [FromQuery] int threshold = 120, [FromQuery] bool invert = false)
     {
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded.");
@@ -24,7 +24,7 @@ public class DocumentController : ControllerBase
         using var srcBitmap = rawBitmap.Copy(SKColorType.Bgra8888);
 
         // 3. Apply the filter
-        using var processedBitmap = ApplyInkSaverFilter(srcBitmap, threshold);
+        using var processedBitmap = ApplyInkSaverFilter(srcBitmap, threshold, invert);
 
         // 4. Export
         using var outputStream = new MemoryStream();
@@ -34,7 +34,7 @@ public class DocumentController : ControllerBase
         return File(outputStream.ToArray(), "image/jpeg");
     }
 
-    private unsafe SKBitmap ApplyInkSaverFilter(SKBitmap source, int threshold)
+    private unsafe SKBitmap ApplyInkSaverFilter(SKBitmap source, int threshold, bool invert)
     {
         int width = source.Width;
         int height = source.Height;
@@ -57,24 +57,31 @@ public class DocumentController : ControllerBase
             int gray = (r * 299 + g * 587 + b * 114) / 1000;
 
             // 2. Thresholding
-            // If the pixel is BRIGHTER than threshold -> Make it WHITE (Background)
-            // If the pixel is DARKER than threshold -> Make it BLACK (Text)
-            
-            if (gray > threshold)
+            // Normal: Bright -> White (BG), Dark -> Black (Text)
+            // Invert: Bright -> Black (Text), Dark -> White (BG)
+
+            bool isBackground;
+
+            if (invert)
             {
-                // WHITE (Background)
-                dstPtr[0] = 255; // B
-                dstPtr[1] = 255; // G
-                dstPtr[2] = 255; // R
-                dstPtr[3] = 255; // A (Fully Opaque)
+                // Dark Mode Input: Background is DARK. So if gray < threshold, it is background.
+                isBackground = (gray < threshold);
             }
             else
             {
-                // BLACK (Text)
-                dstPtr[0] = 0;   // B
-                dstPtr[1] = 0;   // G
-                dstPtr[2] = 0;   // R
-                dstPtr[3] = 255; // A (Fully Opaque)
+                // Standard Paper: Background is BRIGHT. So if gray > threshold, it is background.
+                isBackground = (gray > threshold);
+            }
+
+            if (isBackground)
+            {
+                // Set White
+                dstPtr[0] = 255; dstPtr[1] = 255; dstPtr[2] = 255; dstPtr[3] = 255;
+            }
+            else
+            {
+                // Set Black (Text/Ink)
+                dstPtr[0] = 0; dstPtr[1] = 0; dstPtr[2] = 0; dstPtr[3] = 255;
             }
 
             srcPtr += 4;
