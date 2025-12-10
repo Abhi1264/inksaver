@@ -1,135 +1,115 @@
-# Turborepo starter
+# InkSaver 🖨️
 
-This Turborepo starter is maintained by the Turborepo core team.
+**Stop printing shadows. Start saving ink.**
 
-## Using this example
+InkSaver is a **full-stack document processing tool** designed for students and professionals. It uses intelligent image processing algorithms to convert messy, dark, or shadowed photos of documents into clean, printer-friendly black & white PDF/JPGs.
 
-Run the following command:
+## 🚀 The Problem
 
-```sh
-npx create-turbo@latest
+Taking photos of notes or whiteboards is common, but printing them is a nightmare.
+
+  * **Wasted Ink:** Grey backgrounds drain printer toner instantly.
+  * **Poor Readability:** Shadows make text hard to read on paper.
+  * **Dark Mode Screenshots:** Printing a code snippet (dark background) is impossible without inverting colors first.
+
+## 💡 The Solution
+
+InkSaver uses **Adaptive Thresholding** (implemented in high-performance C\#) to "binarize" images. It intelligently separates text from background noise, ensuring you only print what matters.
+
+## ✨ Key Features
+
+  * **⚡ Blazing Fast Binarization:** Uses **Unsafe C\# Pointers** and `SkiaSharp` for pixel-perfect manipulation in milliseconds.
+  * **🌑 Dark Mode Support:** Smart inversion logic automatically flips white-text-on-black-background to printer-friendly black-on-white.
+  * **🎛️ Real-time Sensitivity Control:** Adjustable threshold slider to perfectly balance noise removal vs. text preservation.
+  * **🔐 Privacy First:** No images are stored on the server. They are processed in memory and discarded immediately.
+  * **📱 Responsive UI:** Built with **shadcn/ui** for a beautiful experience on mobile and desktop.
+
+## 🛠️ Tech Stack
+
+**Monorepo Structure (Turborepo)**
+
+| Component | Technology | Highlights |
+| :--- | :--- | :--- |
+| **Frontend** | **Next.js 16** (App Router) | Static Exports, TypeScript, Tailwind CSS |
+| **UI Library** | **shadcn/ui** | Radix Primitives, Lucide Icons, Glassmorphism |
+| **Backend** | **ASP.NET Core 8 Web API** | Minimal API, High-Performance |
+| **Processing** | **SkiaSharp** | Cross-platform 2D graphics, Unsafe Code blocks |
+
+## 🏗️ Architecture
+
+```mermaid
+graph LR
+    User[User] -->|Uploads Image| NextJS[Next.js Client]
+    NextJS -->|POST /api/process| DotNet[ASP.NET Core API]
+    DotNet -->|Decodes Stream| Skia[SkiaSharp Engine]
+    Skia -->|Adaptive Thresholding| Logic{Algorithm}
+    Logic -->|Clean Image| DotNet
+    DotNet -->|Returns Blob/Zip| NextJS
 ```
 
-## What's inside?
+## 🚀 Getting Started
 
-This Turborepo includes the following packages/apps:
+Follow these steps to run InkSaver locally on your machine.
 
-### Apps and Packages
+### Prerequisites
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+  * **Node.js** (v20+)
+  * **.NET 10 SDK**
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### 1\. Clone the Repository
 
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+git clone https://github.com/Abhi1264/inksaver.git
+cd inksaver
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### 2\. Install Dependencies
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+```bash
+# Install client dependencies
+cd apps/web
+npm install
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+# Restore server dependencies
+cd ../../apps/api
+dotnet restore
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### 3\. Run the Monorepo
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+You can run both the client (Port 3000) and server (Port 5000) concurrently from the root directory.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```bash
+# From the root folder
+npm run dev
 ```
 
-### Remote Caching
+Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) to see the app.
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## 🔌 API Documentation
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+`POST /api/document/process`
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `file` | `FormData` | Required | The image file (JPG/PNG) |
+| `threshold` | `int` | `120` | Sensitivity (0-255). Lower = Whiter. |
+| `invert` | `bool` | `false` | Set `true` to invert colors (for dark mode inputs). |
 
-```
-cd my-turborepo
+## 🤝 Contributing
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+Contributions are welcome\! Please feel free to submit a Pull Request.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## 📄 License
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Distributed under the MIT License. See `LICENSE` for more information.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+-----
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+**Built with ❤️ by Abhinav Kumar Choudhary**
