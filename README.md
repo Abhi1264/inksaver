@@ -32,7 +32,7 @@ InkSaver uses **Adaptive Thresholding** (implemented in high-performance C\#) to
 | :--- | :--- | :--- |
 | **Frontend** | **Next.js 16** (App Router) | Static Exports, TypeScript, Tailwind CSS |
 | **UI Library** | **shadcn/ui** | Radix Primitives, Lucide Icons, Glassmorphism |
-| **Backend** | **ASP.NET Core 8 Web API** | Minimal API, High-Performance |
+| **Backend** | **ASP.NET Core 10 Web API** | Minimal API, High-Performance |
 | **Processing** | **SkiaSharp** | Cross-platform 2D graphics, Unsafe Code blocks |
 
 ## 🏗️ Architecture
